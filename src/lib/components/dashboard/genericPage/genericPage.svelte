@@ -684,7 +684,7 @@
                                 </td>
                                 {#each $columnOrder as columnName}
                                     <td
-                                        class="py-3 px-4 text-sm whitespace-nowrap hover:cursor-pointer "
+                                        class="py-3 px-4 text-sm whitespace-nowrap hover:cursor-pointer"
                                         style="width: {$columnWidths[
                                             columnName
                                         ]}px; min-width: {columnName.length +

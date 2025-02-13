@@ -186,7 +186,7 @@
         } else {
             return;
         }
-
+        
         if (
             value &&
             (!attributeInputValues[attribute] ||

@@ -17,14 +17,6 @@ export interface MessageModal {
     message: string;
 }
 
-interface Translation {
-    [key: string]: string;
-}
-
-interface TranslationEntry {
-    variables: string[];
-    translations: Translation;
-}
 
 const userId = Cookies.get("userId") || "";
 

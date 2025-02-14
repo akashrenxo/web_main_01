@@ -11,9 +11,9 @@ export interface MessageModal {
 
 const userId = Cookies.get("userId") || "";
 
-
 export const userStore = (entityName: string) => {
-    const usersData: Writable<any> = writable([]);
+    const listEntityData: Writable<any> = writable([]);
+    const rolesData: Writable<any> = writable([]);
     const userAttributes: Writable<any> = writable([]);
     const isConnected: Writable<boolean> = writable(false);
     const messageModal: Writable<MessageModal | null> = writable(null);
@@ -35,7 +35,7 @@ export const userStore = (entityName: string) => {
     };
 
     const fetchUsers = () => {
-        usersData.set([]);
+        listEntityData.set([]);
 
         const message = {
             type: "action",
@@ -48,6 +48,24 @@ export const userStore = (entityName: string) => {
                 filter: ["display_name", "roles", "user", "pass_hash"]
             }
         };
+        console.log("sending messsage", message);
+        websocketStore.sendMessage(message);
+    };
+
+    const fetchRoles = (entityname: string) => {
+        rolesData.set([]);
+        const message = {
+            type: "action",
+            action: "ListEntity",
+            env: {
+                user: userId
+            },
+            params: {
+                entityName: entityname,
+                all: true
+            }
+        };
+
         console.log("sending messsage", message);
         websocketStore.sendMessage(message);
     };
@@ -65,6 +83,8 @@ export const userStore = (entityName: string) => {
                 updates: updatedData
             }
         }
+        console.log("sending messsage for update user name", message);
+        websocketStore.sendMessage(message);
     };
 
     const updateUserPassword = (userID: string, newPassword: string) => {
@@ -134,13 +154,17 @@ export const userStore = (entityName: string) => {
         const successCode = result.code;
 
         if ((result.code).substring(0, 3) === "ERR") {
-            usersData.set([]);
+            listEntityData.set([]);
         }
         switch (action) {
             case "ListEntity":
                 if (successCode === "SUCCESS200" && params?.result) {
-                    usersData.set(parseUserData(params?.result));
-                    console.log("userData", params.result);
+                    if (entityName == "role") {
+                        listEntityData.set(parseUserData(params?.result))
+                    } else if (entityName == "user") {
+                        listEntityData.set(parseUserData(params?.result));
+                    }
+                    console.log("listEntityData", parseUserData(params?.result));
                 }
                 break;
             case "GetEntity":
@@ -151,7 +175,14 @@ export const userStore = (entityName: string) => {
                 }
             case "UpdateEntity":
                 if (successCode === "SUCCESS199") {
+                    const lastToastTime: any = localStorage.getItem("lastToastTime");
+                    const now: any = Date.now();
 
+                    if (!lastToastTime || now - lastToastTime > 2000) {
+                        addToast(("user name updated successfully"), "success");
+                        localStorage.setItem("lastToastTime", now);
+                    }
+                    fetchUsers();
                 }
                 break;
             case "RemoveEntity":
@@ -219,10 +250,11 @@ export const userStore = (entityName: string) => {
     return {
         isConnected,
         userAttributes,
-        usersData,
+        listEntityData,
         fetchUserAttributes,
         fetchUsers,
         addUser,
+        fetchRoles,
         updateUserName,
         deleteUser,
         updateUserPassword

@@ -1,9 +1,28 @@
 <script lang="ts">
     import { fade } from "svelte/transition";
+    import { userStore } from "$lib/stores/apiStores/userStore";
 
     export let showUserEditModal;
     export let selectedUserName: string;
-    
+    export let activeMenuUserId: string;
+
+    const { updateUserName } = userStore("user");
+
+    let username = selectedUserName;
+
+    $: {
+        username = selectedUserName;
+        console.log("username", username);
+    }
+
+    const handleSubmit = () => {
+        let updatedData = {
+            display_name: username,
+        };
+
+        updateUserName(activeMenuUserId, updatedData);
+        showUserEditModal = false;
+    };
 </script>
 
 <div
@@ -14,7 +33,6 @@
     transition:fade={{ duration: 200 }}
 >
     <div class="bg-white rounded-lg shadow-lg p-6 w-[400px]">
-
         <h2 class="text-sm font-medium mb-4">Edit User Name</h2>
 
         <input
@@ -35,6 +53,7 @@
             <button
                 type="button"
                 class="px-4 py-2 bg-[#34495E] text-xs font-medium text-white rounded-md"
+                on:click={handleSubmit}
             >
                 Update
             </button>

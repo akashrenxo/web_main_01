@@ -14,15 +14,15 @@
 <main>
     <div class="grid grid-cols-12 font-poppins relative">
         <button
-            class="absolute top-4 {isMenuVisible
+            class="absolute top-8 {isMenuVisible
                 ? 'left-[23%]'
-                : 'left-2'}  bg-white p-2 rounded-full shadow-md transition-all duration-300"
+                : 'left-4'}  bg-white p-2 rounded-full shadow-md transition-all duration-300"
             on:click={toggleMenu}
         >
             {#if isMenuVisible}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6"
+                    class="h-6 w-6 z-[999]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -37,7 +37,7 @@
             {:else}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6"
+                    class="h-6 w-6 z-[999]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

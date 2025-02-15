@@ -3,6 +3,8 @@
     import deleteButton from "$lib/../../src/assests/images/supplier/deleteButton.png";
     import sortingArrows from "$lib/../../src/assests/images/genericPage/sortingArrows.png";
     import filter from "$lib/../../src/assests/images/genericPage/filter01.png";
+    import upArrow from "$lib/../../src/assests/images/genericPage/upArrow.png";
+    import downArrow from "$lib/../../src/assests/images/genericPage/downArrow.png";
 
     import { entityStore } from "$lib/stores/apiStores/entityStores";
     import { onMount } from "svelte";
@@ -39,9 +41,11 @@
     let isFilterModalOpen: boolean = false;
     let isEditModalOpen: boolean = false;
     let isDeleteModalOpen: boolean = false;
-    let isSingleFilterModalOpen = false;
-    let isViewDetailsModalOpen = false;
-    let isColumnModalOpen = false;
+    let isSingleFilterModalOpen: boolean = false;
+    let isViewDetailsModalOpen: boolean = false;
+    let isColumnModalOpen: boolean = false;
+    let arrowDirection: boolean = true;
+    let selectedColumnForDirection: string = "";
 
     let selectedEntity: any = null; // row data
     let selectedEntityId: any = null; // primary key
@@ -176,24 +180,42 @@
             document.removeEventListener("mouseup", stopResize);
         };
     });
+
     // ******************************* handle sorting *******************************************//
 
+    let columnSortStates: {
+        [key: string]: { direction: boolean; active: boolean };
+    } = {};
     let selectedAttributeForSorting: string = "";
     let selectedSortingOrder: string = "";
-    let sortingButton: boolean = false;
 
+    // Replace your handleSorting function with this updated version
     const handleSorting = (attributeName: string) => {
-        if (sortingButton == false) {
-            selectedSortingOrder = "asc";
-            sortingButton = true;
+        // Initialize or toggle sort state for the clicked column
+        if (!columnSortStates[attributeName]) {
+            columnSortStates[attributeName] = { direction: true, active: true };
         } else {
-            selectedSortingOrder = "desc";
-            sortingButton = false;
+            columnSortStates[attributeName].direction =
+                !columnSortStates[attributeName].direction;
         }
 
-        selectedAttributeForSorting = attributeName;
-        let nextoffset = 0;
+        // Reset other columns' active state
+        Object.keys(columnSortStates).forEach((key) => {
+            if (key !== attributeName) {
+                columnSortStates[key] = {
+                    ...columnSortStates[key],
+                    active: false,
+                };
+            }
+        });
 
+        columnSortStates[attributeName].active = true;
+        selectedSortingOrder = columnSortStates[attributeName].direction
+            ? "asc"
+            : "desc";
+        selectedAttributeForSorting = attributeName;
+
+        let nextoffset = 0;
         const localEntityOffset = localStorage.getItem("entityNextOffset");
         if (localEntityOffset) {
             let parseData =
@@ -206,13 +228,13 @@
         }
 
         let localFilterByValues = localStorage.getItem("filterByValues");
-
         let parseData =
             localFilterByValues &&
             localFilterByValues !== "{}" &&
             JSON.parse(localFilterByValues)[entityName] !== undefined
                 ? JSON.parse(localFilterByValues)[entityName]
                 : {};
+
         fetchEntities(
             5,
             nextoffset,
@@ -611,14 +633,20 @@
                                             .toUpperCase()}
                                     </span>
                                     <button
-                                        on:click={() => {
-                                            handleSorting(columnName);
-                                        }}
+                                        on:click={() =>
+                                            handleSorting(columnName)}
+                                        class="focus:outline-none"
                                     >
                                         <img
-                                            src={sortingArrows}
-                                            alt="sortingArrows"
-                                            class="h-6 hover:cursor-pointer p-1"
+                                            src={columnSortStates[columnName]
+                                                ?.active
+                                                ? columnSortStates[columnName]
+                                                      ?.direction
+                                                    ? upArrow
+                                                    : downArrow
+                                                : sortingArrows}
+                                            alt="sort"
+                                            class="h-5 hover:cursor-pointer p-1"
                                         />
                                     </button>
                                 </div>

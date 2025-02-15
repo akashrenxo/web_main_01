@@ -46,7 +46,6 @@
         listEntityData,
         fetchUserAttributes,
         fetchUsers,
-        fetchRoles,
     } = userStore("user");
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -167,12 +166,12 @@
         <div class="w-full max-w-7xl mx-auto px-4 py-8 z-0 font-sans">
             <div class="flex justify-end gap-4 font-poppins text-sm">
                 <button
-                    class="bg-[#00B894] text-white px-4 py-2 rounded-lg shadow transition-all"
+                    class="bg-[#00B894] text-white px-4 py-2 rounded-lg text-xs shadow transition-all"
                     on:click={() => {
                         showAddUserModal = true;
                     }}
                 >
-                    Add User
+                    Create New User
                 </button>
             </div>
             <div class="relative h-[450px] rounded-lg mt-5">
@@ -194,9 +193,9 @@
                                         </th>
                                     {/each}
                                     <th
-                                        class="px-6 py-4 text-left text-sm font-normal text-gray-800 uppercase tracking-wider w-32"
+                                        class="px-2 py-4 text-left text-sm font-normal text-gray-800 uppercase tracking-wider w-32"
                                     >
-                                        Actions
+                                        Manage User
                                     </th>
                                 </tr>
                             </thead>
@@ -226,7 +225,7 @@
                                                             alt="viewDetails"
                                                             class=" h-5 mr-2"
                                                         />
-                                                        View Roles
+                                                        view roles
                                                     </button>
                                                 {:else}
                                                     <p class="">
@@ -313,7 +312,7 @@
                                                                 <span
                                                                     class=" font-medium"
                                                                 >
-                                                                    change user
+                                                                    edit user
                                                                     name
                                                                 </span>
                                                             </p>
@@ -340,7 +339,7 @@
                                                                 <span
                                                                     class=" font-medium"
                                                                 >
-                                                                    change
+                                                                    reset
                                                                     password
                                                                 </span>
                                                             </p>
@@ -348,6 +347,15 @@
 
                                                         <button
                                                             class="block w-full px-2 py-2 text-left text-gray-700 hover:bg-gray-100 text-xs"
+                                                            on:click={() => {
+                                                                activeMenuUserId =
+                                                                    user[
+                                                                        "user"
+                                                                    ];
+                                                                handleShowModal(
+                                                                    user,
+                                                                );
+                                                            }}
                                                         >
                                                             <p
                                                                 class=" flex flex-row items-center space-x-2"
@@ -360,7 +368,8 @@
                                                                 <span
                                                                     class=" font-medium"
                                                                 >
-                                                                    add new role
+                                                                    assign new
+                                                                    role
                                                                 </span>
                                                             </p>
                                                         </button>

@@ -18,12 +18,23 @@ export const userStore = (entityName: string) => {
     const isConnected: Writable<boolean> = writable(false);
     const messageModal: Writable<MessageModal | null> = writable(null);
 
+    const handleToast = (message: string, status: "success" | "error" | "info" | "warning") => {
+        const lastToastTime: any = localStorage.getItem("lastToastTime");
+        const now: any = Date.now();
+
+        if (!lastToastTime || now - lastToastTime > 2000) {
+            addToast(message, status);
+            localStorage.setItem("lastToastTime", now);
+        }
+    }
+
     const fetchUserAttributes = async () => {
         const message = {
             type: "action",
             action: "GetEntity",
             env: {
-                user: userId
+                user: userId,
+                all: true
             },
             params: {
                 entityName: "entity",
@@ -41,7 +52,8 @@ export const userStore = (entityName: string) => {
             type: "action",
             action: "ListEntity",
             env: {
-                user: userId
+                user: userId,
+                all: true
             },
             params: {
                 entityName: entityName,
@@ -137,6 +149,40 @@ export const userStore = (entityName: string) => {
         websocketStore.sendMessage(message);
     };
 
+    const removeRoles = (selectedRoles: string[], activeMenuUserId: string) => {
+        const message = {
+            type: "action",
+            action: "UserRoleRemove",
+            env: {
+                user: userId
+            },
+            params: {
+                entityName,
+                user: activeMenuUserId,
+                roleName: selectedRoles
+            }
+        }
+        console.log("messagerolesremove", message);
+        websocketStore.sendMessage(message);
+    };
+
+    const addRoles = (selectedRoles: string[], activeMenuUserId: string) => {
+        const message = {
+            type: "action",
+            action: "UserRoleAdd",
+            env: {
+                user: userId
+            },
+            params: {
+                entityName,
+                user: activeMenuUserId,
+                roleName: selectedRoles
+            }
+        }
+        console.log("messagerolesadd", message);
+        websocketStore.sendMessage(message);
+    };
+
     const parseUserData = (data: string) => {
         try {
             const parseData = JSON.parse(data);
@@ -155,6 +201,7 @@ export const userStore = (entityName: string) => {
 
         if ((result.code).substring(0, 3) === "ERR") {
             listEntityData.set([]);
+            handleToast("something is going wrong", "error");
         }
         switch (action) {
             case "ListEntity":
@@ -175,25 +222,13 @@ export const userStore = (entityName: string) => {
                 }
             case "UpdateEntity":
                 if (successCode === "SUCCESS199") {
-                    const lastToastTime: any = localStorage.getItem("lastToastTime");
-                    const now: any = Date.now();
-
-                    if (!lastToastTime || now - lastToastTime > 2000) {
-                        addToast(("user name updated successfully"), "success");
-                        localStorage.setItem("lastToastTime", now);
-                    }
+                    handleToast("user name updated successfully", "success");
                     fetchUsers();
                 }
                 break;
             case "RemoveEntity":
                 if (successCode === "SUCCESS220") {
-                    const lastToastTime: any = localStorage.getItem("lastToastTime");
-                    const now: any = Date.now();
-
-                    if (!lastToastTime || now - lastToastTime > 2000) {
-                        addToast(("user deleted successfully"), "success");
-                        localStorage.setItem("lastToastTime", now);
-                    }
+                    handleToast("user deleted successfully", "success");
                     fetchUsers();
                 }
                 break;
@@ -203,24 +238,24 @@ export const userStore = (entityName: string) => {
                 break;
             case "ChangeUserPassword":
                 if (successCode === "SUCCESS200") {
-                    const lastToastTime: any = localStorage.getItem("lastToastTime");
-                    const now: any = Date.now();
-
-                    if (!lastToastTime || now - lastToastTime > 2000) {
-                        addToast(("user passward updated successfully"), "success");
-                        localStorage.setItem("lastToastTime", now);
-                    }
+                    handleToast("user passward updated successfully", "success");
                 }
                 break;
             case "AddUser":
                 if (successCode === "SUCCESS122") {
-                    const lastToastTime: any = localStorage.getItem("lastToastTime");
-                    const now: any = Date.now();
-
-                    if (!lastToastTime || now - lastToastTime > 2000) {
-                        addToast(("user added successfully"), "success");
-                        localStorage.setItem("lastToastTime", now);
-                    }
+                    handleToast("user added successfully", "success");
+                    fetchUsers();
+                }
+                break;
+            case "UserRoleRemove":
+                if (successCode === "SUCCESS2002") {
+                    handleToast("roles removed successfully", "success");
+                    fetchUsers();
+                }
+                break;
+            case "UserRoleAdd":
+                if (successCode === "SUCCESS2000") {
+                    handleToast("roles added successfully", "success");
                     fetchUsers();
                 }
                 break;
@@ -255,6 +290,8 @@ export const userStore = (entityName: string) => {
         fetchUsers,
         addUser,
         fetchRoles,
+        removeRoles,
+        addRoles,
         updateUserName,
         deleteUser,
         updateUserPassword
